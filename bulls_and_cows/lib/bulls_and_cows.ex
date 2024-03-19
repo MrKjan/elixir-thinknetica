@@ -8,15 +8,11 @@ defmodule BullsAndCows do
 
   Game should be played in iex. First you init game by new_game/0,
   then you should pass state to make_turn/2 until you win
-
-  Game example:
-  $ game = BullsAndCows.new_game()
-  %BullsAndCows{number_encrypted: "ೞ", seed: 314, moves: [], win: false}
   """
 
   @seed_range 500
 
-  defstruct number_encrypted: [],
+  defstruct number_encrypted: "",
             seed: 0,
             moves: [],
             win: false
@@ -29,7 +25,7 @@ defmodule BullsAndCows do
     seed = Enum.random(0..@seed_range)
 
     %__MODULE__{
-      number_encrypted: encrypt(number),
+      number_encrypted: encrypt(number, seed),
       seed: seed,
       moves: [],
       win: false
@@ -49,26 +45,36 @@ defmodule BullsAndCows do
         win: false
       }
 
-      iex> BullsAndCows.make_turn(%BullsAndCows{number_encrypted: "ڊ", seed: 411, moves: [%{answer: 1263, bulls: 4, cows: 0}], win: true}, 8888)
-      %{win: true, moves_cnt: 1}
-
   """
-  def make_turn(%__MODULE__{win: true, moves: moves}, _turn),
-    do: %{win: true, moves_cnt: length(moves)}
+  def make_turn(%__MODULE__{win: false} = state, answer) do
+    riddle_list = decrypt(state[:number_encrypted], state[:seed])
 
-  def make_turn(state, answer) do
-    %{bulls: bulls, cows: cows} =
-      check_turn(
-        decrypt(state[:number_encrypted], state[:seed]),
-        Integer.digits(answer)
-      )
+    answer_list =
+      answer
+      |> answer_to_list
 
-    %{
-      state
-      | moves: [%{answer: answer, bulls: bulls, cows: cows} | state[:moves]],
-        win: 4 == bulls
-    }
+    case check_turn(riddle_list, answer_list) do
+      %{bulls: bulls, cows: cows} ->
+        %{
+          state
+          | moves: [%{answer: answer, bulls: bulls, cows: cows} | state[:moves]],
+            win: 4 == bulls
+        }
+
+      %{error: error} ->
+        %{state | moves: [%{answer: answer, error: error} | state[:moves]]}
+    end
   end
+
+  def answer_to_list(answer) when answer > 100 and answer < 9999 do
+    answer
+    |> Integer.digits()
+    |> add_heading_zero()
+  end
+
+  def answer_to_list(answer) when not is_integer(answer), do: %{error: :not_a_number}
+  def answer_to_list(answer) when 0 > answer, do: %{error: :negative_number}
+  def answer_to_list(_), do: %{error: :incorrect_length}
 
   @doc """
   Checks count of bulls and cows in answer
@@ -79,12 +85,17 @@ defmodule BullsAndCows do
       %{bulls: 2, cows: 1}
 
   """
+  def check_turn(_, %{error: error}), do: %{error: error}
   def check_turn(riddle, answer), do: check_turn(riddle, answer, 0, 0)
+
   def check_turn(_riddle, [], bulls, cows), do: %{bulls: bulls, cows: cows}
 
   def check_turn(riddle, [head | tail], bulls, cows) do
     cond do
-      head == elem(List.to_tuple(riddle), 3 - length(tail)) ->
+      head in tail ->
+        %{error: :duplicated_digits}
+
+      head == Enum.at(riddle, 3 - length(tail)) ->
         check_turn(riddle, tail, bulls + 1, cows)
 
       head in riddle ->
@@ -98,8 +109,8 @@ defmodule BullsAndCows do
   @doc """
     Returns array like [0,1,2,3]
   """
-  def generate_number_list(), do: generate_number_list([])
-  def generate_number_list(number_list) when 4 == length(number_list), do: number_list
+  def generate_number_list, do: generate_number_list([])
+  def generate_number_list([_, _, _, _] = number_list), do: number_list
 
   def generate_number_list(number_list) do
     digit = Enum.random(0..9)
@@ -119,19 +130,8 @@ defmodule BullsAndCows do
       "}"
 
   """
-  def encrypt(number_list, seed \\ 0) do
-    number =
-      number_list
-      |> List.to_tuple()
-      |> then(fn tuple ->
-        elem(tuple, 0) * 1000 +
-          elem(tuple, 1) * 100 +
-          elem(tuple, 2) * 10 +
-          elem(tuple, 3)
-      end)
-      |> Kernel.+(seed)
-
-    to_string([number])
+  def encrypt([t, h, d, u], seed \\ 0) do
+    to_string([seed + t * 1_000 + h * 100 + d * 10 + u])
   end
 
   @doc """
@@ -141,18 +141,22 @@ defmodule BullsAndCows do
       [0,1,2,3]
 
   """
-  def decrypt(character, seed \\ 0) do
-    number_list =
-      character
-      |> to_charlist
-      |> hd
-      |> Kernel.-(seed)
-      |> Integer.digits()
-
-    if 3 == length(number_list) do
-      [0 | number_list]
-    else
-      number_list
-    end
+  def decrypt(<<character::utf8>>, seed \\ 0) do
+    character
+    |> Kernel.-(seed)
+    |> Integer.digits()
+    |> add_heading_zero()
   end
+
+  @doc """
+  ## Examples
+
+      iex> BullsAndCows.add_heading_zero([1,2,3])
+      [0,1,2,3]
+
+      iex> BullsAndCows.add_heading_zero([1,2,3,4])
+      [1,2,3,4]
+
+  """
+  def add_heading_zero(number_list), do: List.duplicate(0, 4 - length(number_list)) ++ number_list
 end
