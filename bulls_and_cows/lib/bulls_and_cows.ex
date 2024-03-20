@@ -48,10 +48,7 @@ defmodule BullsAndCows do
   """
   def make_turn(%__MODULE__{win: false} = state, answer) do
     riddle_list = decrypt(state[:number_encrypted], state[:seed])
-
-    answer_list =
-      answer
-      |> answer_to_list
+    answer_list = answer_to_list(answer)
 
     case check_turn(riddle_list, answer_list) do
       %{bulls: bulls, cows: cows} ->
