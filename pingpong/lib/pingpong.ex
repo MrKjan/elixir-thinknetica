@@ -1,18 +1,16 @@
 defmodule Pingpong do
   @moduledoc """
-  Documentation for `Pingpong`.
+  Example of a simple pingpong server
   """
 
   @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Pingpong.hello()
-      :world
-
+  Runs pingpong server
   """
-  def hello do
-    :world
+  def server do
+    receive do
+      {:ping, pid} ->
+        send(pid, {:pong, node()})
+        server()
+    end
   end
 end
