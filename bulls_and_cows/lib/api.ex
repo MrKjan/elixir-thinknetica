@@ -7,21 +7,21 @@ defmodule BullsAndCows.API do
   @doc """
     Make number to guess to be picked, start the game
   """
-  def start_link() do
-    GenServer.start_link(__MODULE__, nil)
+  def start_link do
+    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
   @doc """
     Guess the number
   """
-  def make_turn(pid, answer) do
+  def make_turn(pid \\ __MODULE__, answer) do
     GenServer.call(pid, {:make_turn, answer})
   end
 
   # Server (callbacks)
 
   @impl true
-  def init(_) do
+  def init(nil) do
     initial_state = BullsAndCows.new_game()
     {:ok, initial_state}
   end
