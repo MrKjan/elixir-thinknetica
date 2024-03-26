@@ -1,18 +1,20 @@
 defmodule ListerBehaviour do
   @moduledoc """
-  Documentation for `Listers`.
+  Makes lists out of terms.
   """
 
-  @doc """
-  Hello world.
+  @callback to_list(any()) :: List
+end
 
-  ## Examples
+defmodule SenselessStruct do
+  @behaviour ListerBehaviour
 
-      iex> Listers.hello()
-      :world
+  defstruct data: [],
+            state: "",
+            err_code: :no_error
 
-  """
-  def hello do
-    :world
+  @impl ListerBehaviour
+  def to_list(%__MODULE__{data: data, state: state, err_code: err_code} = term) do
+    [data, state, err_code]
   end
 end
