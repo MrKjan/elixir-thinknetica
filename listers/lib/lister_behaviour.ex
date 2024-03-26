@@ -14,7 +14,7 @@ defmodule SenselessStruct do
             err_code: :no_error
 
   @impl ListerBehaviour
-  def to_list(%__MODULE__{data: data, state: state, err_code: err_code} = term) do
+  def to_list(%__MODULE__{data: data, state: state, err_code: err_code}) do
     [data, state, err_code]
   end
 end

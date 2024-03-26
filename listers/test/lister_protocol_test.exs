@@ -32,6 +32,11 @@ defmodule ListerProtocolTest do
     assert ListerProtocol.to_list("abcde") == [97, 98, 99, 100, 101]
   end
 
+
+  test "Check bitstring" do
+    catch_error ListerProtocol.to_list(<<1::1, 0::1>>)
+  end
+
   test "Check integer" do
     assert ListerProtocol.to_list(12345) == [1, 2, 3, 4, 5]
   end

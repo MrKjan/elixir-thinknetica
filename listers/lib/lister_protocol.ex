@@ -20,5 +20,6 @@ defimpl ListerProtocol, for: [Integer] do
 end
 
 defimpl ListerProtocol, for: [BitString] do
-  def to_list(data), do: String.to_charlist(data)
+  def to_list(data) when is_binary(data), do: String.to_charlist(data)
+  # def to_list(data) when is_binary(data), do: String.to_charlist(data)
 end
