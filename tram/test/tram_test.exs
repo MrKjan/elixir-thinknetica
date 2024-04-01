@@ -25,7 +25,7 @@ defmodule TramTest do
     ref = Process.monitor(pid)
     Tram.move()
 
-    assert_receive {:DOWN, ^ref, :process, object, reason}
-    assert object == pid
+    assert_receive {:DOWN, ^ref, :process, ^pid, reason}
+    assert {:function_clause, _} = reason
   end
 end
