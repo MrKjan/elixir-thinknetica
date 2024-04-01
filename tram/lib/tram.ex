@@ -34,7 +34,7 @@ defmodule Tram do
 
   @impl GenServer
   def init(passengers) do
-    passengers = list_to_map_set(passengers)
+    passengers = MapSet.new(passengers)
     initial_state = {:doors_open, passengers}
     {:ok, initial_state}
   end
@@ -77,8 +77,8 @@ defmodule Tram do
   def handle_cast({:swap_passengers, going_in, going_out}, {:doors_open, passengers}) do
     passengers =
       passengers
-      |> MapSet.union(list_to_map_set(going_in))
-      |> MapSet.difference(list_to_map_set(going_out))
+      |> MapSet.union(MapSet.new(going_in))
+      |> MapSet.difference(MapSet.new(going_out))
 
     {:noreply, {:doors_open, passengers}}
   end
@@ -87,22 +87,4 @@ defmodule Tram do
   def handle_call(:status, _from, state) do
     {:reply, state, state}
   end
-
-  # @impl GenServer
-  # def handle_call(:pop, _from, state) do
-  #   [to_caller | new_state] = state
-  #   {:reply, to_caller, new_state}
-  # end
-
-  # @impl GenServer
-  # def handle_cast({:push, element}, state) do
-  #   new_state = [element | state]
-  #   {:noreply, new_state}
-  # end
-
-  # Utils
-  defp list_to_map_set(list) when is_list(list), do: list_to_map_set(list, MapSet.new())
-
-  defp list_to_map_set([], ret), do: ret
-  defp list_to_map_set([head | tail], ret), do: list_to_map_set(tail, MapSet.put(ret, head))
 end

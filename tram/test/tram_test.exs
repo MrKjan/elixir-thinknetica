@@ -16,12 +16,16 @@ defmodule TramTest do
     Tram.move()
     Tram.stop()
     Tram.open_doors()
+    assert {:doors_open, _} = Tram.get_status()
   end
 
-  test "Incorrect state transition" do
-    start_link_supervised!(Tram)
+  test "Incorrect state transition is not implemented by mistake" do
+    start_supervised(Tram)
+    pid = GenServer.whereis(Tram)
+    ref = Process.monitor(pid)
     Tram.move()
-    # Tram.get_status(pid)
-    # :timer.sleep(100)
+
+    assert_receive {:DOWN, ^ref, :process, object, reason}
+    assert object == pid
   end
 end
