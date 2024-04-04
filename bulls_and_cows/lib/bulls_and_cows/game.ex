@@ -8,10 +8,7 @@ defmodule BullsAndCows.Game do
   then you should pass state to make_turn/2 until you win
   """
 
-  @seed_range 500
-
-  defstruct number_encrypted: "",
-            seed: 0,
+  defstruct number: [],
             moves: [],
             win: false
 
@@ -20,11 +17,9 @@ defmodule BullsAndCows.Game do
   """
   def new_game() do
     number = generate_number_list()
-    seed = Enum.random(0..@seed_range)
 
     %__MODULE__{
-      number_encrypted: encrypt(number, seed),
-      seed: seed,
+      number: number,
       moves: [],
       win: false
     }
@@ -32,20 +27,9 @@ defmodule BullsAndCows.Game do
 
   @doc """
   Updates state with your answer, checks win conditions
-
-  ## Examples
-
-      iex> BullsAndCows.make_turn(%BullsAndCows{number_encrypted: "ೞ", seed: 314, moves: [], win: false}, 1234)
-      %BullsAndCows{
-        number_encrypted: "ೞ",
-        seed: 314,
-        moves: [%{answer: 1234, bulls: 0, cows: 1}],
-        win: false
-      }
-
   """
   def make_turn(%__MODULE__{win: false} = state, answer) do
-    riddle_list = decrypt(state.number_encrypted, state.seed)
+    riddle_list = state.number
     answer_list = answer_to_list(answer)
 
     case check_turn(riddle_list, answer_list) do
@@ -104,17 +88,6 @@ defmodule BullsAndCows.Game do
     else
       generate_number_list([digit | number_list])
     end
-  end
-
-  defp encrypt([t, h, d, u], seed) do
-    to_string([seed + t * 1_000 + h * 100 + d * 10 + u])
-  end
-
-  defp decrypt(<<character::utf8>>, seed) do
-    character
-    |> Kernel.-(seed)
-    |> Integer.digits()
-    |> add_heading_zero()
   end
 
   defp add_heading_zero(number_list), do: List.duplicate(0, 4 - length(number_list)) ++ number_list
