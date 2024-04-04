@@ -21,20 +21,19 @@
       cows: <%= cows %>
       <br>
     <% end %>
-    <.form for={@form} phx-submit="submit_value">
-      <label for="lname"> <%=  %> </label><br>
-      <%= if not @game_state.win do %>
-        <%= if not Enum.empty?(@game_state.moves) and :error in Map.keys(hd(@game_state.moves)) do %>
-          <%= with %{error: error, answer: _} <- hd(@game_state.moves) do %>
-            <%= error %><br>
+    <%= if not @game_state.win do %>
+      <.form for={@form} phx-submit="submit_value">
+          <%= if not Enum.empty?(@game_state.moves) and :error in Map.keys(hd(@game_state.moves)) do %>
+            <%= with %{error: error, answer: _} <- hd(@game_state.moves) do %>
+              <%= error %><br>
+            <% end %>
           <% end %>
-        <% end %>
-        <input type="text" name="answer" inputmode="numeric" maxlength="4" autocomplete="off"><br><br>
-        <.button type="submit">Submit</.button>
-      <% else %>
+          <input type="text" name="answer" inputmode="numeric" maxlength="4" autocomplete="off"><br><br>
+          <.button type="submit">Submit</.button>
+      </.form>
+    <% else %>
         You won!
-      <% end %>
-    </.form>
+    <% end %>
     """
   end
 
