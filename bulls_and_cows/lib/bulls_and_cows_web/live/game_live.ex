@@ -38,7 +38,6 @@
   end
 
   def handle_event("submit_value", %{"answer" => answer}, socket) do
-    IO.inspect socket
     answer = try do
       String.to_integer(answer)
     rescue

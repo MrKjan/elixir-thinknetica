@@ -90,5 +90,5 @@ defmodule BullsAndCows.Game do
     end
   end
 
-  defp add_heading_zero(number_list), do: List.duplicate(0, 4 - length(number_list)) ++ number_list
+  def add_heading_zero(number_list), do: List.duplicate(0, 4 - length(number_list)) ++ number_list
 end
