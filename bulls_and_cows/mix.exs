@@ -22,7 +22,7 @@ defmodule BullsAndCows.MixProject do
   defp deps do
     [
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:accessible, "~> 0.3.0"}
+      {:credo, "~> 1.7"}
     ]
   end
 end
